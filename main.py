@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 import music2
 import music
+import music_tostack
 import random
 import typing
 import secret
@@ -169,7 +170,7 @@ async def on_message(message):
 
 
 # cogs 是裡面有discord command的一種class
-cogs = [music]
+cogs = [music_tostack]
 #cogs = [music2]
 
 for cog in cogs:
