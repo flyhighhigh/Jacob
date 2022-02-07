@@ -630,6 +630,17 @@ class Music(commands.Cog):
         await ctx.send(embed=embed)
         ctx.voice_state.songs.remove(index - 1)
         #await ctx.message.add_reaction('✅')
+    
+    @commands.command(name='shuffle',aliases=['打散','隨機','sf'])
+    async def _shuffle(self, ctx: commands.Context):
+        """Shuffles the queue."""
+
+        if len(ctx.voice_state.songs) == 0:
+            return await ctx.send(embed=embeds.no_song_queuing())
+
+        ctx.voice_state.songs.shuffle()
+        await ctx.message.add_reaction('🔀')
+
 
 
 

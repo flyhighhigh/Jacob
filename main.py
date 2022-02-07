@@ -6,7 +6,14 @@ import music_tostack
 import random
 import typing
 import secret
+import nacl
+import os
 
+# import os, struct, discord
+# bitness = struct.calcsize('P') * 8
+# target = 'x64' if bitness > 32 else 'x86'
+# filename = os.path.join(os.path.dirname(os.path.abspath(discord.__file__)), 'bin', 'libopus-0.dll')
+# discord.opus.load_opus('D:\\user\\Desktop\\libopus-0\\libopus-0.dll')
 client = commands.Bot(command_prefix='--',description='你們好 我叫阿傑 大家都叫我傑哥')
 
 @client.event
@@ -142,7 +149,7 @@ async def on_message(message):
             ["我看看","讓我康康"],#3
             ["懂什麼","懂甚麼"],#4
             ["新遊戲"],#5
-            ["累了","睡覺","先下","晚安","下線"],#6
+            ["累了","睡覺","先下","晚安","下線",'睡了'],#6
             #["你好","你們好","傑哥","杰哥","阿杰","阿傑","HI","hi","Hi"],#7
             ['好蒿','爽爽'],#8
             ['好爽']

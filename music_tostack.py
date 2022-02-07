@@ -7,22 +7,30 @@ import functools
 import itertools
 import math
 import random
+from tabnanny import check
 import requests
 import secret
 from discord_components import *
 import time
-
+import json
+import urllib3
 
 import discord
 import youtube_dl
 from async_timeout import timeout
 from discord.ext import commands
+from youtube_search import YoutubeSearch
+from googlesearch import search
+from bs4 import BeautifulSoup
 
 # Silence useless bug reports messages
 youtube_dl.utils.bug_reports_message = lambda: ''
 
+headers = {'User-Agent': 'User-Agent:Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36'}
+
 voice_states = {} #存放各伺服器的語音狀態
-labels = {
+
+labels = {# 輸入狀態 回傳該狀態下按鈕應該要寫什麼
     'pause':'resume',
     'play':'pause',
 }
@@ -36,6 +44,12 @@ class embeds:
 
     def player_init():
         return discord.Embed(title='',description='**播放器準備中**',color=0xf8c300)
+    
+    def cant_find_lyrics():
+        return discord.Embed(title='',description='**傑哥沒有這首歌的歌詞  😢**',color=0xf8c300)
+    
+    def finding_lyrics():
+        return discord.Embed(title='',description='**歌詞搜尋中**',color=0xf8c300)
 
     def no_song_playing():
         return discord.Embed(title='',description='**無歌曲播放中 🤐**',color=0xf93a2f)
@@ -50,7 +64,7 @@ class embeds:
         return discord.Embed(title='',description='**我家很大 歡迎你們來我家點歌 😏**',color=0xf93a2f)
     
     def loading_error():
-        return discord.Embed(title='',description='**歌曲載入過久 10秒後可能遭跳過**',color=0xf93a2f)
+        return discord.Embed(title='',description='**歌曲載入過久 10秒後可能自動跳過**',color=0xf93a2f)
     
     def success_del(string:str):
         return discord.Embed(title='',
@@ -90,14 +104,14 @@ class YTDLSource(discord.PCMVolumeTransformer):
     }
 
     FFMPEG_OPTIONS = {
-        'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
+        'before_options': '-reconnect 1 -reconnect_at_eof 1 -reconnect_streamed 1 -reconnect_delay_max 10',
         'options': '-vn',
     }
 
     ytdl = youtube_dl.YoutubeDL(YTDL_OPTIONS)
 
-    def __init__(self, ctx: commands.Context, source: discord.FFmpegPCMAudio, *, data: dict, volume: float = 0.5):
-        super().__init__(source, volume)
+    def __init__(self,ctx:commands.Context,source:discord.FFmpegPCMAudio,*,data:dict,original_query:str):
+        super().__init__(source)
 
         self.requester = ctx.author
         self.channel = ctx.channel
@@ -110,6 +124,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
         self.uploader = data.get('uploader')
         self.uploader_id = data.get('uploader_id')
         self.uploader_url = data.get('uploader_url')
+        self.channel_id = data.get('channel_id') # 用這個不會有自訂義id的問題
         date = data.get('upload_date')
         self.upload_date = date[6:8] + '.' + date[4:6] + '.' + date[0:4]
         self.title = data.get('title')
@@ -117,13 +132,11 @@ class YTDLSource(discord.PCMVolumeTransformer):
         self.description = data.get('description')
         self.duration = parse_duration(int(data.get('duration')))
         self.duration_int = int(data.get('duration'))
-        self.tags = data.get('tags')
-        self.url = data.get('webpage_url')
-        self.views = data.get('view_count')
-        self.likes = data.get('like_count')
-        self.dislikes = data.get('dislike_count')
-        self.stream_url = data.get('url')
-        self.icon_url = id_to_icon(self.uploader_id)
+        self.url = data.get('webpage_url') # youtube頁面的url
+        self.stream_url = data.get('url') # 擷取音訊的url
+        
+        self.icon_url = id_to_icon(self.channel_id)
+        self.original_query = original_query
 
     def __str__(self):
         return '**{0.title}** by **{0.uploader}**'.format(self)
@@ -134,6 +147,8 @@ class YTDLSource(discord.PCMVolumeTransformer):
 
         partial = functools.partial(cls.ytdl.extract_info, search, download=False, process=False)
         data = await loop.run_in_executor(None, partial)
+        with open("firstextract.json", "w") as f:
+            json.dump(data, f, indent = 4)
 
         if data is None:
             print('找不到任何結果 -> `{}`'.format(search))
@@ -155,6 +170,8 @@ class YTDLSource(discord.PCMVolumeTransformer):
         webpage_url = process_info['webpage_url']
         partial = functools.partial(cls.ytdl.extract_info, webpage_url, download=False)
         processed_info = await loop.run_in_executor(None, partial)
+        # with open("output.json", "w") as f:
+        #      json.dump(processed_info, f, indent = 4)
 
         if processed_info is None:
             print('Couldn\'t fetch `{}`'.format(webpage_url))
@@ -171,19 +188,54 @@ class YTDLSource(discord.PCMVolumeTransformer):
                     print('Couldn\'t retrieve any matches for `{}`'.format(webpage_url))
                     return
 
-        return cls(ctx, discord.FFmpegPCMAudio(info['url'], **cls.FFMPEG_OPTIONS), data=info)
+        #return cls(ctx, discord.FFmpegPCMAudio(info['url'], **cls.FFMPEG_OPTIONS), data=info)
+        return cls(ctx, discord.FFmpegPCMAudio(info['url']), data=info,original_query=search)
 
-    @classmethod
-    async def regather_stream(cls, data, *, loop):
-        """Used for preparing a stream, instead of downloading.
-        Since Youtube Streaming links expire."""
-        loop = loop or asyncio.get_event_loop()
-        requester = data['requester']
+    
 
-        to_run = functools.partial(cls.ytdl.extract_info, url=data['webpage_url'], download=False)
-        data = await loop.run_in_executor(None, to_run)
+    # #自己改的
+    # @classmethod
+    # async def create_source(cls, ctx: commands.Context, search: str, *, loop: asyncio.BaseEventLoop = None):
+    #     loop = loop or asyncio.get_event_loop()
 
-        return cls(discord.FFmpegPCMAudio(data['url']), data=data, requester=requester)
+    #     if search.startswith('https'):
+    #         webpage_url=search
+    #     else:
+    #         results = YoutubeSearch(search_terms=search, max_results=10).to_dict()
+    #         print(results[0]['url_suffix'])
+    #         print(len(results))
+    #         with open("search10.json", "w") as f:
+    #             json.dump(results, f, indent = 4)
+        
+    #         webpage_url = """https://www.youtube.com/""" + results[0]['url_suffix']
+        
+    
+    #     partial = functools.partial(cls.ytdl.extract_info, webpage_url, download=False)
+    #     processed_info = await loop.run_in_executor(None, partial)
+
+    #     if processed_info is None:
+    #         print('Couldn\'t fetch `{}`'.format(webpage_url))
+    #         return
+
+    #     if 'entries' not in processed_info:
+    #         info = processed_info
+    #     else:
+    #         info = None
+    #         while info is None:
+    #             try:
+    #                 info = processed_info['entries'].pop(0)
+    #             except IndexError:
+    #                 print('Couldn\'t retrieve any matches for `{}`'.format(webpage_url))
+    #                 return
+
+    #     return cls(ctx, discord.FFmpegPCMAudio(info['url'], **cls.FFMPEG_OPTIONS), data=info)
+
+        #return cls(ctx, discord.FFmpegPCMAudio(info['url'], **cls.FFMPEG_OPTIONS), data=info)
+        #return cls(ctx, discord.FFmpegPCMAudio(info['url']), data=info)
+
+
+    
+
 
 # class SongQueue(asyncio.Queue):
 #     def __getitem__(self, item):
@@ -228,16 +280,17 @@ class MusicPlayer:
         self.next = asyncio.Event()
 
         self.msg = None  # Now playing message
-        self.volume = 0.5
+        #self.volume = 0.5
         self.current = None # now playing source (YTDLsource)
+        self.killed = False
 
-        ctx.bot.loop.create_task(self.player_loop())
+        self.audio_player = self.bot.loop.create_task(self.player_loop())
 
     async def player_loop(self):
         """Our main player loop."""
         await self.bot.wait_until_ready()
 
-        while not self.bot.is_closed():
+        while not self.bot.is_closed() and self.killed==False:
             print('in task')
             self.next.clear()
 
@@ -247,22 +300,22 @@ class MusicPlayer:
                     source = await self.queue.get()
             except asyncio.TimeoutError:
                 await self._channel.send(embed=embeds.timeout_songless())
-                return self.destroy(self._guild)
+                self.destroy(self._guild)
+                return
 
-            if not isinstance(source, YTDLSource):
-                # Source was probably a stream (not downloaded)
-                # So we should regather to prevent stream expiration
-                try:
-                    source = await YTDLSource.regather_stream(source, loop=self.bot.loop)
-                except Exception as e:
-                    await self._channel.send(f'There was an error processing your song.\n'
-                                             f'```css\n[{e}]\n```')
-                    continue
+            # if not isinstance(source, YTDLSource):
+            #     # Source was probably a stream (not downloaded)
+            #     # So we should regather to prevent stream expiration
+            #     try:
+            #         source = await YTDLSource.regather_stream(source, loop=self.bot.loop)
+            #     except Exception as e:
+            #         await self._channel.send(f'There was an error processing your song.\n'
+            #                                  f'```css\n[{e}]\n```')
+            #         continue
 
-            source.volume = self.volume
+            #source.volume = self.volume
             self.current = source
 
-            
             self.vc.play(source, after=lambda _: self.bot.loop.call_soon_threadsafe(self.next.set))
             print('start play')
 
@@ -277,25 +330,25 @@ class MusicPlayer:
             start_time = time.time()
             await self.bot.loop.create_task(self.button_for_song(start=start_time))
             await self.next.wait()
-            self.current.mode = 'end'
 
             # Make sure the FFmpeg process is cleaned up.
             source.cleanup()
-            self.current = None
+            #self.current = None
 
     async def button_for_song(self,start=time.time()):#每首歌開始會進來
         paused_time = 0
-        while self.current.mode not in 'end skip':
+        while self.current.mode not in 'end skip' and self.killed==False:
 
             if not self.vc.is_playing() and self.current.mode!='pause':
                 print('loading or exit')#有可能在剛點歌還沒下載好的時候退出
                 through_time = time.time()-start
                 print(through_time,'sec',self.current.title)
 
-                if  through_time >= 10 or through_time >= self.current.duration_int:
+                if  self.killed or through_time >= 10:
                     # 下載或播放時間超過10秒(或自身長度)
                     # 且現在沒手動停止卻停止撥放的歌，自動退出
-                    self.current.mode='end'
+                    try: self.current.mode='end'
+                    except: pass
                     break
                 else:
                     await self.current.channel.send(embed=embeds.loading_error())
@@ -347,42 +400,51 @@ class MusicPlayer:
 
 
         print('leave song')#自然播放結束
-        
+        try: self.current.mode='end'
+        except: pass
         await self.msg.edit(
-            embed=self.create_embed(),
+            embed=self.create_embed(self.current),
             components=[]
         )
+        self.current=None
     
-    def create_embed(self):
-        mode=self.current.mode
+    def create_embed(self,source=None):
+        if source==None:
+            source=self.current
+
+        mode=source.mode
+
         embed = (discord.Embed(
-                    title='{0.current.title}'.format(self),
-                    url='{0.current.url}'.format(self),
+                    title=f'{source.title}',
+                    url=f'{source.url}',
                     color=discord.Color.green())
-                .add_field(name='時長', value=self.current.duration,inline=True)
-                .add_field(name='點播者', value=self.current.requester.name,inline=True)
-                .set_thumbnail(url=self.current.thumbnail))
+                .add_field(name='時長', value=source.duration,inline=True)
+                .add_field(name='點播者', value=source.requester.name,inline=True)
+                .set_thumbnail(url=source.thumbnail))
         
         embed.set_author(
-            name=self.current.uploader,
-            url=self.current.uploader_url,
-            icon_url=self.current.icon_url
+            name=source.uploader,
+            url=source.uploader_url,
+            icon_url=source.icon_url
             )
         
         if mode == 'play':
             embed.set_footer(text='🎵 現正播放 Now Playing 🎵')
         elif mode == 'pause':
-            embed.set_footer(text=f'⏸️ 暫停中 Paused ⏸️  -  By {self.current.mode_changer}')
+            embed.set_footer(text=f'⏸️ 暫停中 Paused ⏸️  -  By {source.mode_changer}')
         elif mode == 'end':
             embed.set_footer(text='↪️ 播放結束 Play Ends ↪️')
         elif mode == 'skip':
-            embed.set_footer(text=f'↪️ 已跳過 Skipped ↪️  -  By {self.current.mode_changer}')
+            embed.set_footer(text=f'↪️ 已跳過 Skipped ↪️  -  By {source.mode_changer}')
         #embed.set_footer(text=f'{self.requester.name}', icon_url=self.requester.avatar_url)
         #print(id_to_icon(self.source.uploader_id))
         return embed
 
     def destroy(self, guild):
         """Disconnect and cleanup the player."""
+        print('cancel1')
+        self.killed=True
+        print('cancel2')
         return self.bot.loop.create_task(self._cog.cleanup(guild))
 
 
@@ -398,20 +460,23 @@ class Music(commands.Cog):
         try:
             await guild.voice_client.disconnect()
         except AttributeError:
-            pass
+            print('error1')
 
         try:
             del self.players[guild.id]
         except KeyError:
-            pass
+            print('error')
     
-    def get_player(self, ctx):
+    def get_player(self, ctx ,add=True):# add=是否要產生一個
         """Retrieve the guild player, or generate one."""
         try:# find guild player
             player = self.players[ctx.guild.id]
         except:# generate
-            player = MusicPlayer(ctx)
-            self.players[ctx.guild.id] = player
+            if add:
+                player = MusicPlayer(ctx)
+                self.players[ctx.guild.id] = player
+            else:
+                return None
 
         return player
 
@@ -456,12 +521,14 @@ class Music(commands.Cog):
 
         async with ctx.typing():
             try:
-                player = self.get_player(ctx)
+                player = self.get_player(ctx,add=True) #尋找此伺服器是否有player 若沒有則新增
                 source = await YTDLSource.create_source(ctx, search, loop=self.bot.loop)
-                #song = Song(ctx,source)
+
                 await player.queue.put(source)
-                #await ctx.voice_state.songs.put(song)
-                await ctx.send(embed=embeds.success_add(ctx,source.title))
+                try: title = source.title # 不用regather的方式
+                except: title = source['title'] # 等等撥放時還要regather 此時只回傳一個dict
+
+                await ctx.send(embed=embeds.success_add(ctx,title))
             except:
                 return await ctx.send(f'An error occurred while processing this request: {search}')
 
@@ -478,19 +545,176 @@ class Music(commands.Cog):
 
         if vc:
             await ctx.send(embed=embeds.disconnected(ctx))
+            player = self.get_player(ctx,add=False)
+            player.killed=True
             await self.cleanup(ctx.guild)
         else:
             await ctx.send(embed=embeds.bot_not_in_voice())
+    
+    @commands.command(name='refresh', aliases=['rf', 'player','now'])
+    async def _refresh_player_msg(self, ctx: commands.Context):
+        
+        player = self.get_player(ctx,add=False)
 
-#-------------------------------------------------------------------------------2/5進度
+        if not player:# 沒有player 
+            return await ctx.send(embed=embeds.no_song_playing())
+        if not player.current:# 有player 但最後一首歌已經結束或跳過
+            return await ctx.send(embed=embeds.no_song_playing())
+        
+        # 有player 且正在播放或暫停
+        if player.msg:
+            await player.msg.delete()
+        
+        player.msg = await ctx.send(
+            content='',
+            embed=player.create_embed(),
+            components=[[
+                Button(label=labels[player.current.mode], style=ButtonStyle.green),
+                Button(label='skip',style=ButtonStyle.blue)]]
+        )
+    
+    @commands.command(name='lyrics', aliases=['ly','lr'])
+    async def _lyrics(self,ctx:commands.Context, *, query: str =''):
+
+        await ctx.trigger_typing()
+
+        if not query:
+            keyin=False
+            player = self.get_player(ctx,add=False)
+            if not player:# 沒有player 
+                return await ctx.send(embed=embeds.no_song_playing())
+            if not player.current:# 有player 但最後一首歌已經結束或跳過
+                return await ctx.send(embed=embeds.no_song_playing())
+            query = player.current.title
+            newqry = player.current.original_query+' 魔鏡歌詞網'
+        else:
+            keyin=True
+
+        query +=' 魔鏡歌詞網'
+        
+        lyric_msg = await ctx.send(embed=embeds.finding_lyrics())
+
+        def mojin(query):
+            for url in search(query, stop=5, pause=2.0):
+                if url.startswith('https://mojim.com/twy'):
+                    return url
+            return None
+        
+        result = mojin(query)# 用影片標題找
+        if not result:# 沒找到網址
+            if not keyin:# 用使用者play指令輸入的找 若搜尋是由使用者輸入 當然找不到
+                result = mojin(newqry)
+
+            if not result:
+                return await lyric_msg.edit(embed=embeds.cant_find_lyrics())
+
+        try:
+            # 找到魔鏡歌詞網的編輯功能
+            url = result.replace('https://mojim.com/twy','https://mojim.com/twthx')
+            url = url.replace('.htm','x1.htm')
+            # print('2',url)
+
+            html = requests.get(url,headers=headers)
+            soup = BeautifulSoup(html.text, 'html.parser')
+            text = str(soup.find('textarea',id='aaa_d'))
+            
+            # 若搜尋是使用現在播放的歌曲
+            if not keyin:
+                songstart=text.find('【')
+                songstart=text.find('【',songstart+1)
+                songend=text.find('】',songstart+1)
+                song_title=text[songstart+1:songend]
+                if song_title not in query:# 且歌名不在影片標題中 則視為出錯
+                    raise
+                
+            start=text.find('>')
+            end=text.find('\n',start+1)
+
+            title=text[start:end].replace('>修改 ','')
+            lyrics=text[end:].replace('</textarea>','')
+
+            while True:# 刪除動態歌詞
+                start = lyrics.find("[")
+                end = lyrics.find("\n",start+1)
+                if start==-1 or end==-1:
+                    break
+                lyrics=lyrics.replace(lyrics[start:end+1],'')
+
+            while True:# 刪除前後換行
+                if lyrics.startswith('\n'):
+                    lyrics=lyrics[1:]
+                elif lyrics.endswith('\n'):
+                    lyrics=lyrics[:-1]
+                else:
+                    break
+
+            embed=discord.Embed(title='',description=lyrics,color=discord.Color.blue())
+            embed.set_author(name=title,url=result)
+            await lyric_msg.edit(embed=embed)
+        except:
+            return await lyric_msg.edit(embed=embeds.cant_find_lyrics())
+
+
+    @commands.command(name='pause',aliases=['ps','PS','暫停','Pause'])
+    async def _pause(self, ctx: commands.Context):
+        
+        vc = ctx.voice_client
+        player = self.get_player(ctx,add=False)
+
+        if not player:# 沒有player 
+            return await ctx.send(embed=embeds.no_song_playing())
+        if not player.current:# 有player 但最後一首歌已經結束或跳過
+            return await ctx.send(embed=embeds.no_song_playing())
+
+        #有player且播放中或暫停中
+        if player.current.mode=='pause':return
+        print('pause')
+        vc.pause()
+        player.current.mode = 'pause'
+        player.current.mode_changer = ctx.author.name
+
+        await player.msg.edit(
+            embed=player.create_embed(),
+            components=[[
+                Button(label='resume',style=ButtonStyle.green),
+                Button(label='skip',style=ButtonStyle.blue)]]
+        )
+        #await ctx.send("Paused ⏸️")
+        await ctx.message.add_reaction('✅')
+    
+    @commands.command(name='resume',aliases=['rs','RS','繼續','Resume'])
+    async def _resume(self, ctx: commands.Context):
+        
+        vc = ctx.voice_client
+        player = self.get_player(ctx,add=False)
+
+        if not player:# 沒有player 
+            return await ctx.send(embed=embeds.no_song_playing())
+        if not player.current:# 有player 但最後一首歌已經結束或跳過
+            return await ctx.send(embed=embeds.no_song_playing())
+
+        #有player且播放中或暫停中
+        if player.current.mode=='play':return
+        print('resume')
+        vc.resume()
+        player.current.mode = 'play'
+
+        await player.msg.edit(
+            embed=player.create_embed(),
+            components=[[
+                Button(label='pause', style=ButtonStyle.green),
+                Button(label='skip',style=ButtonStyle.blue)]]
+        )
+        await ctx.message.add_reaction('✅')
+
+#-------------------------------------------------------------------------------2/7進度
+
 '''
     @commands.command(name='queue',aliases=['Q','q','清單','歌單'])
     async def _queue(self, ctx: commands.Context, *, page: int = 1):
         """Shows the player's queue.
         You can optionally specify the page to show. Each page contains 10 elements.
         """
-
-        #await ctx.send(embed=ctx.voice_state.current.create_embed())
 
         #if not ctx.voice_state.is_playing or not ctx.voice_state.voice.is_playing:
         if ctx.voice_state.current.mode=='end':
@@ -527,29 +751,7 @@ class Music(commands.Cog):
         await ctx.send(embed=embed)
     
 
-    @commands.command(name='refresh', aliases=['rf', 'player'])
-    async def _refresh_player_msg(self, ctx: commands.Context):
-        """Displays the currently playing song."""
-
-        #await ctx.send(embed=ctx.voice_state.current.create_embed())
-        #await ctx.voice_state.create_msg(ctx)
-        
-        if ctx.voice_state.msg:#有存在的msg
-            await ctx.voice_state.msg.delete()
-            if ctx.voice_state.current.mode in 'skip end':
-                return await ctx.send(embed=embeds.no_song_playing())
-        else:#沒有msg 也就是還沒有播放東西
-            return await ctx.send(embed=embeds.no_song_playing())
-
-        # ctx.voie_state.msg = await ctx.send(embed=embeds.player_init())
-        # print('609')
-        ctx.voice_state.msg = await ctx.send(
-            content='',
-            embed=ctx.voice_state.current.create_embed(),
-            components=[[
-                Button(label=labels[ctx.voice_state.current.mode], style=ButtonStyle.green),
-                Button(label='skip',style=ButtonStyle.blue)]]
-        )
+    
 
 
     @commands.command(name='remove',aliases=['RM','rm','刪除','移除','DEL','del','delete','dl'])
@@ -601,14 +803,21 @@ def id_to_icon(ID):
     data=response.json()
 
     if data['pageInfo']['totalResults'] == 0:
+        return 'https://www.freeiconspng.com/thumbs/error-icon/error-icon-4.png'
+        # 若找不到則用username再找一次
         url = f"https://youtube.googleapis.com/youtube/v3/channels?part=snippet&forUsername={ID}&key={secret.YT_API_KEY}"
         response = requests.get(url)
         data=response.json()
-        if data['pageInfo']['totalResults'] == 0:
-            return 'https://www.freeiconspng.com/thumbs/error-icon/error-icon-4.png'
     
     return (data['items'][0]['snippet']['thumbnails']['default']['url'])
 
+
+def check_url(url):
+    try:
+        urllib3.urlopen(url)
+        return True
+    except:
+        return False
 
 def setup(bot):
     # 使用 cogs.setup(client) 會發生的事
