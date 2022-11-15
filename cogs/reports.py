@@ -56,7 +56,6 @@ class Report(commands.Cog, name="Report"):
         """
         解除清單
         """
-        print(ctx.author.id)
         sended = await ctx.send(embed=Embed(
             description='正在處理中...',
             color=discord.Color.dark_blue()
