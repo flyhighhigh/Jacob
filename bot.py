@@ -1,3 +1,4 @@
+import json
 import os
 import platform
 import random
@@ -15,7 +16,10 @@ PREFIX = os.getenv('PREFIX')
 # APPID = os.getenv('APPID')
 TOKEN = os.getenv('TOKEN')
 OWNER = os.getenv('OWNER')
-PREFIX = os.getenv('PREFIX') # 不知道為甚麼手機上要兩次才會成功
+
+if len(PREFIX) > 3:
+    with open('prefix.json','r',encoding='utf-8') as file:
+        PREFIX = json.load(file)['prefix']
 
 class MyBot(commands.Bot):
     def __init__(self) -> None:
