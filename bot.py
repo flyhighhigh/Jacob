@@ -191,7 +191,7 @@ async def load(ctx: Context, ext: str = None):
                     exception = f"{type(e).__name__}: {e}"
                     print(f"Failed to load extension {extension}\n{exception}")
                     result += f"Failed to load extension {extension}\n{exception}"
-    ctx.send(result)
+    await ctx.send(result)
 
 @bot.command()
 @checks.is_owner()
@@ -222,7 +222,7 @@ async def reload(ctx: Context, ext: str = None):
                     exception = f"{type(e).__name__}: {e}"
                     print(f"Failed to reload extension {extension}\n{exception}")
                     result += f"Failed to reload extension {extension}\n{exception}"
-    ctx.send(result)
+    await ctx.send(result)
 
 @bot.command()
 @checks.is_owner()
