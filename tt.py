@@ -9,5 +9,5 @@ ret = ret.split('\n')[2:-1]
 modified = ''
 for i in ret:
     modified += i[i.find(':')+1:].replace(' ','')+' '
-g.commit("-m",f"auto commit on change ({modified})")
+g.commit("-m",f"auto commit by GitPython ({modified})")
 print('')
