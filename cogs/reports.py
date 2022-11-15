@@ -25,7 +25,12 @@ class Report(commands.Cog, name="Report"):
         with open('reports.json','w',encoding='utf-8') as file:
             temp = {'reports':self.reports}
             json.dump(temp,file,indent=4)
+
+        print('')
+        print('--- auto commit and push ---')
         subprocess.call(['bash', './auto_commit.sh'])
+        print('--- pushed to github ---')
+        print('')
     
     @commands.hybrid_command(
         name="report_拉清單",
