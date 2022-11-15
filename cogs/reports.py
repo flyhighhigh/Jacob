@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta,date
 import json
 import os
+import subprocess
 from time import time
 import discord
 from discord import ButtonStyle, Embed
@@ -18,6 +19,13 @@ class Report(commands.Cog, name="Report"):
         with open('reports.json','r',encoding='utf-8') as file:
             reports = json.load(file)['reports']
         return reports
+
+    def file_store(self):
+        # store to reports.json and commit to github
+        with open('reports.json','w',encoding='utf-8') as file:
+            temp = {'reports':self.reports}
+            json.dump(temp,file,indent=4)
+        subprocess.call(['bash', './auto_commit.sh'])
     
     @commands.hybrid_command(
         name="report_拉清單",
@@ -41,11 +49,8 @@ class Report(commands.Cog, name="Report"):
         embed.set_author(name='✅ | 舉報成功')
         embed.set_footer(text='鬥大感謝你的舉報',icon_url='https://cdn-longterm.mee6.xyz/plugins/welcome/images/698431872157352003/aa9f42d312a0ae398257f0377d151f175d5a6e600981f74bbc51ecd0f8e4f696.gif')
         await sended.edit(embed=embed)
-        
-        # store to reports.json
-        with open('reports.json','w',encoding='utf-8') as file:
-            temp = {'reports':self.reports}
-            json.dump(temp,file,indent=4)
+
+        self.file_store()
     
 
     @commands.hybrid_command(
@@ -81,9 +86,7 @@ class Report(commands.Cog, name="Report"):
         await sended.edit(embed=embed)
         
         # store to reports.json
-        with open('reports.json','w',encoding='utf-8') as file:
-            temp = {'reports':self.reports}
-            json.dump(temp,file,indent=4)
+        self.file_store()
 
     @commands.hybrid_command(
         name="show_reports_查看目前清單",
