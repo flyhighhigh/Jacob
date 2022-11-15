@@ -27,6 +27,10 @@ class Report(commands.Cog, name="Report"):
         """
         拉清單
         """
+        sended = await ctx.send(embed=Embed(
+            description='正在處理中...',
+            color=discord.Color.dark_blue()
+        ))
         self.reports.append({'name':idiot,'reason':reason})
         embed = Embed(
             title=f'{idiot} | {reason}',
@@ -34,7 +38,7 @@ class Report(commands.Cog, name="Report"):
         )
         embed.set_author(name='✅ | 舉報成功')
         embed.set_footer(text='鬥大感謝你的舉報',icon_url='https://cdn-longterm.mee6.xyz/plugins/welcome/images/698431872157352003/aa9f42d312a0ae398257f0377d151f175d5a6e600981f74bbc51ecd0f8e4f696.gif')
-        await ctx.send(embed=embed)
+        await sended.edit(embed=embed)
         
         # store to reports.json
         with open('reports.json','w',encoding='utf-8') as file:
