@@ -1,4 +1,6 @@
 import discord
+from discord import ButtonStyle, Embed
+from discord.ui import Select,View,Button
 from discord.ext import commands
 import random
 import typing
@@ -126,8 +128,9 @@ class Others(commands.Cog):
             
     
     @commands.hybrid_command(name='guodon_模仿國動',description="老子瘋狗的外號他媽的十歲就有阿")
-    async def _guodon(self,ctx,amount:typing.Optional[int],member: typing.Optional[discord.Member]):
+    async def _guodon(self,ctx:commands.Context,amount:typing.Optional[int],member: typing.Optional[discord.Member]):
         """模擬國動"""
+        sended = await ctx.send('正在處理中...')
 
         if not amount:
             amount=1
@@ -147,12 +150,13 @@ class Others(commands.Cog):
 
             index.remove(new)
 
-        await ctx.send(temp)
+        await sended.edit(content=temp)
     
     @commands.hybrid_command(name='ping_目前延遲',description="查看機器人延遲")
-    async def ping(self,ctx):
+    async def ping(self,ctx:commands.Context):
         """機器人延遲"""
-        await ctx.send(f'Current Ping = {round(self.bot.latency*1000)}ms')
+        sended = await ctx.send('正在處理中...')
+        await sended.edit(content=f'Current Ping = {round(self.bot.latency*1000)}ms')
 
     #哪時候加入
     # @commands.hybrid_command(name='joined_加入時間',description="查看加入時間")
