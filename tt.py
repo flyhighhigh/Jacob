@@ -1,6 +1,5 @@
 import git
 
-print('')
 g = git.cmd.Git()
 ret = g.add(".")
 ret:str = g.status()
@@ -10,5 +9,5 @@ modified = ''
 for i in ret:
     modified += i[i.find(':')+1:].replace(' ','')+' '
 g.commit("-m",f"auto commit by GitPython ({modified})")
-g.push()
-print('')
+ret = g.push()
+print(ret)
