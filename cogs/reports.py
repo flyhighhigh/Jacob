@@ -60,7 +60,7 @@ class Report(commands.Cog, name="Report"):
         sended = await ctx.send(embed=Embed(
             description='正在處理中...',
             color=discord.Color.dark_blue()
-        ))
+        ),ephemeral=True)
         finded = [i for i in self.reports if i["name"] == idiot and i["author"] == ctx.author.id]
         
         result_str = ''
