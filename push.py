@@ -10,4 +10,3 @@ for i in ret:
     modified += i[i.find(':')+1:].replace(' ','')+' '
 g.commit("-m",f"auto commit by GitPython ({modified})")
 ret = g.push()
-print(ret)

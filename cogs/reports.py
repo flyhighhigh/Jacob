@@ -1,12 +1,12 @@
 from datetime import datetime, timedelta,date
 import json
 import os
-import subprocess
 from time import time
 import discord
 from discord import ButtonStyle, Embed
 from discord.ui import Select,View,Button
 from discord.ext import commands
+import git
 from requests import options
 from helpers import checks
 
@@ -28,17 +28,21 @@ class Report(commands.Cog, name="Report"):
 
         print('')
         print('--- auto commit and push ---')
-        g = git.cmd.Git()
-        ret = g.add(".")
-        ret:str = g.status()
-        ret = ret[ret.find("Changes to be committed:"):]
-        ret = ret.split('\n')[2:-1]
-        modified = ''
-        for i in ret:
-            modified += i[i.find(':')+1:].replace(' ','')+' '
-        g.commit("-m",f"auto commit by GitPython ({modified})")
-        ret = g.push()
-        print('--- pushed to github ---')
+        try:
+            g = git.cmd.Git()
+            ret = g.add(".")
+            ret:str = g.status()
+            ret = ret[ret.find("Changes to be committed:"):]
+            ret = ret.split('\n')[2:-1]
+            modified = ''
+            for i in ret:
+                modified += i[i.find(':')+1:].replace(' ','')+' '
+            g.commit("-m",f"auto commit by GitPython ({modified})")
+            ret = g.push()
+            print('--- pushed to github ---')
+        except Exception as e:
+            print(f'--- error occurs: {e} ---')
+        
         print('')
     
     @commands.hybrid_command(
