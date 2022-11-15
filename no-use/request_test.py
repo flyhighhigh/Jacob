@@ -1,8 +1,12 @@
+import os
 import requests
 from youtube_scraper.scraper import scrape_url
 from bs4 import BeautifulSoup
 
-YT_API_KEY = 'AIzaSyD0tobCwbU7lZwGcAbx4JMf_qADCVgRfRA'
+from dotenv import load_dotenv
+
+load_dotenv()
+YT_API_KEY = os.getenv('YT_API_KEY')
 ID = 'mixer'
 
 
