@@ -102,13 +102,20 @@ async def pull(ctx: Context, ext: str = None):
     """
     自動從github拉，然後reload
     """
+    result = ''
     print('')
     print('--- pulling ---')
-    g = git.cmd.Git()
-    result = g.pull() + '\n'
+    try:
+        g = git.cmd.Git()
+        result:str = g.pull() + '\n'
+    except Exception as e:
+        result = str(e) + '\n'
     print(result)
+    
     print('--- reloading ---')
-    if ext:
+    if result.startswith("Already up to date."):
+        pass
+    elif ext:
         try:
             await bot.reload_extension(f"cogs.{ext}")
             print(f"Reloaded extension '{ext}'")

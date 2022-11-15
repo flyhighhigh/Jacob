@@ -36,7 +36,8 @@ class Report(commands.Cog, name="Report"):
             ret = ret.split('\n')[2:-1]
             modified = ''
             for i in ret:
-                modified += i[i.find(':')+1:].replace(' ','')+' '
+                if len(modified)!=0:modified+=','
+                modified += i[i.find(':')+1:].replace(' ','')
             g.commit("-m",f"auto commit by GitPython ({modified})")
             ret = g.push()
             print('--- pushed to github ---')
