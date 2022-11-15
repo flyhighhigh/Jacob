@@ -9,6 +9,7 @@ from discord.ext import tasks, commands
 from discord.ext.commands import Bot
 from discord.ext.commands import Context
 from dotenv import load_dotenv
+import git
 
 from helpers import checks
 
@@ -103,7 +104,9 @@ async def pull(ctx: Context, ext: str = None):
     """
     print('')
     print('--- pulling ---')
-    result = subprocess.getoutput(['bash', './auto_pull.sh']) + '\n'
+    g = git.cmd.Git()
+    result = g.pull()
+    print(result)
     print('--- reloading ---')
     if ext:
         try:
