@@ -105,18 +105,18 @@ async def pull(ctx: Context, ext: str = None):
     print('')
     print('--- pulling ---')
     g = git.cmd.Git()
-    result = g.pull()
+    result = g.pull() + '\n'
     print(result)
     print('--- reloading ---')
     if ext:
         try:
             await bot.reload_extension(f"cogs.{ext}")
             print(f"Reloaded extension '{ext}'")
-            result += f"Reloaded extension '{ext}'"
+            result += f"Reloaded extension '{ext}'" + '\n'
         except Exception as e:
             exception = f"{type(e).__name__}: {e}"
             print(f"Failed to reload extension {extension}\n{exception}")
-            result += f"Failed to reload extension {extension}\n{exception}"
+            result += f"Failed to reload extension {extension}\n{exception}" + '\n'
     else:
         for file in os.listdir(f"./cogs"):
             if file.endswith(".py"):
@@ -124,11 +124,11 @@ async def pull(ctx: Context, ext: str = None):
                 try:
                     await bot.reload_extension(f"cogs.{extension}")
                     print(f"Reloaded extension '{extension}'")
-                    result += f"Reloaded extension '{extension}'"
+                    result += f"Reloaded extension '{extension}'" + '\n'
                 except Exception as e:
                     exception = f"{type(e).__name__}: {e}"
                     print(f"Failed to reload extension {extension}\n{exception}")
-                    result += f"Failed to reload extension {extension}\n{exception}"
+                    result += f"Failed to reload extension {extension}\n{exception}" + '\n'
 
     print('--- pull and reload finished ---')
     print('')
@@ -146,11 +146,11 @@ async def unload(ctx: Context, ext: str = None):
         try:
             await bot.unload_extension(f"cogs.{ext}")
             print(f"Unloaded extension '{ext}'")
-            result += f"Unloaded extension '{ext}'"
+            result += f"Unloaded extension '{ext}'" + '\n'
         except Exception as e:
             exception = f"{type(e).__name__}: {e}"
             print(f"Failed to unload extension {extension}\n{exception}")
-            result += f"Failed to unload extension {extension}\n{exception}"
+            result += f"Failed to unload extension {extension}\n{exception}" + '\n'
     else:
         for file in os.listdir(f"./cogs"):
             if file.endswith(".py"):
@@ -158,11 +158,11 @@ async def unload(ctx: Context, ext: str = None):
                 try:
                     await bot.unload_extension(f"cogs.{extension}")
                     print(f"Unloaded extension '{extension}'")
-                    result += f"Unloaded extension '{extension}'"
+                    result += f"Unloaded extension '{extension}'" + '\n'
                 except Exception as e:
                     exception = f"{type(e).__name__}: {e}"
                     print(f"Failed to unload extension {extension}\n{exception}")
-                    result += f"Failed to unload extension {extension}\n{exception}"
+                    result += f"Failed to unload extension {extension}\n{exception}" + '\n'
     await ctx.send(result)
 
 @bot.command()
@@ -177,11 +177,11 @@ async def load(ctx: Context, ext: str = None):
         try:
             await bot.load_extension(f"cogs.{ext}")
             print(f"Loaded extension '{ext}'")
-            result += f"Loaded extension '{ext}'"
+            result += f"Loaded extension '{ext}'" + '\n'
         except Exception as e:
             exception = f"{type(e).__name__}: {e}"
             print(f"Failed to load extension {extension}\n{exception}")
-            result += f"Failed to load extension {extension}\n{exception}"
+            result += f"Failed to load extension {extension}\n{exception}" + '\n'
     else:
         for file in os.listdir(f"./cogs"):
             if file.endswith(".py"):
@@ -189,11 +189,11 @@ async def load(ctx: Context, ext: str = None):
                 try:
                     await bot.load_extension(f"cogs.{extension}")
                     print(f"Loaded extension '{extension}'")
-                    result += f"Loaded extension '{extension}'"
+                    result += f"Loaded extension '{extension}'" + '\n'
                 except Exception as e:
                     exception = f"{type(e).__name__}: {e}"
                     print(f"Failed to load extension {extension}\n{exception}")
-                    result += f"Failed to load extension {extension}\n{exception}"
+                    result += f"Failed to load extension {extension}\n{exception}" + '\n'
     await ctx.send(result)
 
 @bot.command()
@@ -208,11 +208,11 @@ async def reload(ctx: Context, ext: str = None):
         try:
             await bot.reload_extension(f"cogs.{ext}")
             print(f"Reloaded extension '{ext}'")
-            result += f"Reloaded extension '{ext}'"
+            result += f"Reloaded extension '{ext}'" + '\n'
         except Exception as e:
             exception = f"{type(e).__name__}: {e}"
             print(f"Failed to reload extension {extension}\n{exception}")
-            result += f"Failed to reload extension {extension}\n{exception}"
+            result += f"Failed to reload extension {extension}\n{exception}" + '\n'
     else:
         for file in os.listdir(f"./cogs"):
             if file.endswith(".py"):
@@ -220,11 +220,11 @@ async def reload(ctx: Context, ext: str = None):
                 try:
                     await bot.reload_extension(f"cogs.{extension}")
                     print(f"Reloaded extension '{extension}'")
-                    result += f"Reloaded extension '{extension}'"
+                    result += f"Reloaded extension '{extension}'" + '\n'
                 except Exception as e:
                     exception = f"{type(e).__name__}: {e}"
                     print(f"Failed to reload extension {extension}\n{exception}")
-                    result += f"Failed to reload extension {extension}\n{exception}"
+                    result += f"Failed to reload extension {extension}\n{exception}" + '\n'
     await ctx.send(result)
 
 @bot.command()
