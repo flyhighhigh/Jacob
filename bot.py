@@ -44,7 +44,7 @@ class MyBot(commands.Bot):
         )
         print("-------------------")
         status_task.start()
-        if sys.argv > 1: await from_restart()
+        if len(sys.argv) > 1: await from_restart()
 
     async def setup_hook(self) -> None:
         for file in os.listdir(f"./cogs"):
