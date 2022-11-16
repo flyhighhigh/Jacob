@@ -175,7 +175,7 @@ async def restart(ctx: Context, ext: str = None):
     sended = await ctx.send(result + '\nrestarting bot...')
     channel_id = str(ctx.channel.id)
     message_id = str(sended.id)
-    os.execv(sys.executable, ['python'] + sys.argv + [channel_id,message_id])
+    os.execv(sys.executable, ['python',sys.executable,channel_id,message_id])
     
 
 @bot.command()
