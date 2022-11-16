@@ -4,7 +4,6 @@ import platform
 import random
 import subprocess
 import sys
-from time import sleep
 
 import discord
 from discord.ext import tasks, commands
@@ -22,7 +21,7 @@ TOKEN = os.getenv('TOKEN')
 OWNER = os.getenv('OWNER')
 
 if len(PREFIX) > 3:
-    with open('prefix.json','r',encoding='utf-8') as file:
+    with open('config.json','r',encoding='utf-8') as file:
         PREFIX = json.load(file)['prefix']
 
 class MyBot(commands.Bot):
@@ -45,6 +44,7 @@ class MyBot(commands.Bot):
         )
         print("-------------------")
         status_task.start()
+        if sys.argv > 1: await from_restart()
 
     async def setup_hook(self) -> None:
         for file in os.listdir(f"./cogs"):
@@ -59,17 +59,6 @@ class MyBot(commands.Bot):
         print(PREFIX,TOKEN)
         await bot.tree.sync()
 
-        if len(sys.argv) > 1:
-            print(sys.argv)
-            try:
-                channel_id = int(sys.argv[1])
-                message_id = int(sys.argv[2])
-                channel = await bot.fetch_channel(channel_id)
-                msg = await channel.fetch_message(message_id)
-                cont = msg.content + '\nPull and restart finished. Hello World!'
-                await msg.edit(cont)
-            except:
-                pass
 
     async def on_command_error(ctx, error):
         if isinstance(error, commands.MissingRequiredArgument):
@@ -85,11 +74,22 @@ class MyBot(commands.Bot):
             await ctx.send(embed=embed)
             #await ctx.send('***無效指令，我看你是完全不懂哦***')
 
-if sys.argv > 1: sleep(5)
+
 intents = discord.Intents.all()
 intents.message_content = True
 bot = MyBot()
 
+async def from_restart():
+    print(sys.argv)
+    try:
+        channel_id = int(sys.argv[1])
+        message_id = int(sys.argv[2])
+        channel = await bot.fetch_channel(channel_id)
+        msg = await channel.fetch_message(message_id)
+        cont = msg.content + '\nPull and restart finished. Hello World!'
+        await msg.edit(cont)
+    except:
+        pass
 
 # def flyhighhigh(ctx: commands.Context):
 #     if ctx.author.id == 617692516871045121:
