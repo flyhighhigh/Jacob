@@ -4,6 +4,7 @@ import platform
 import random
 import subprocess
 import sys
+from time import sleep
 
 import discord
 from discord.ext import tasks, commands
@@ -70,21 +71,21 @@ class MyBot(commands.Bot):
             except:
                 pass
 
-    # async def on_command_error(ctx, error):
-    #     if isinstance(error, commands.MissingRequiredArgument):
-    #         embed = discord.Embed(title='',
-    #                               description='**輸入參數錯誤或不足，我看你完全是不懂哦**',
-    #                               color=0xf93a2f)
-    #         await ctx.send(embed=embed)
-    #         #await ctx.send('***輸入參數錯誤或不足，我看你完全是不懂哦***')
-    #     if isinstance(error, commands.CommandNotFound):
-    #         embed = discord.Embed(title='',
-    #                               description='**無效指令，我看你是完全不懂哦**',
-    #                               color=0xf93a2f)
-    #         await ctx.send(embed=embed)
-    #         #await ctx.send('***無效指令，我看你是完全不懂哦***')
+    async def on_command_error(ctx, error):
+        if isinstance(error, commands.MissingRequiredArgument):
+            embed = discord.Embed(title='',
+                                  description='**輸入參數錯誤或不足，我看你完全是不懂哦**',
+                                  color=0xf93a2f)
+            await ctx.send(embed=embed)
+            #await ctx.send('***輸入參數錯誤或不足，我看你完全是不懂哦***')
+        if isinstance(error, commands.CommandNotFound):
+            embed = discord.Embed(title='',
+                                  description='**無效指令，我看你是完全不懂哦**',
+                                  color=0xf93a2f)
+            await ctx.send(embed=embed)
+            #await ctx.send('***無效指令，我看你是完全不懂哦***')
 
-
+if sys.argv > 1: sleep(5)
 intents = discord.Intents.all()
 intents.message_content = True
 bot = MyBot()
