@@ -3,6 +3,7 @@ import os
 import platform
 import random
 import subprocess
+import sys
 
 import discord
 from discord.ext import tasks, commands
@@ -56,6 +57,17 @@ class MyBot(commands.Bot):
                     print(f"Failed to load extension {extension}\n{exception}")
         print(PREFIX,TOKEN)
         await bot.tree.sync()
+
+        if len(sys.argv) == 3:
+            channel_id = int(sys.argv[1])
+            message_id = int(sys.argv[2])
+            try:
+                channel = await bot.fetch_channel(channel_id)
+                msg = await channel.fetch_message(message_id)
+                cont = msg.content + '\nPull and restart finished. Hello World!'
+                await msg.edit(cont)
+            except:
+                pass
 
     async def on_command_error(ctx, error):
         if isinstance(error, commands.MissingRequiredArgument):
@@ -140,6 +152,30 @@ async def pull(ctx: Context, ext: str = None):
     print('--- pull and reload finished ---')
     print('')
     await ctx.send(result)
+
+@bot.command()
+@checks.is_owner()
+async def restart(ctx: Context, ext: str = None):
+    """
+    自動從github pull，然後重啟
+    """
+    result = ''
+    print('')
+    print('--- pulling ---')
+    try:
+        g = git.cmd.Git()
+        result:str = g.pull()
+    except Exception as e:
+        result = str(e)
+    print(result)
+    print('--- pull and finished ---')
+    print('')
+
+    sended = await ctx.send(result + '\nrestarting bot...')
+    channel_id = str(ctx.channel.id)
+    message_id = str(sended.id)
+    os.execv(sys.executable, ['python'] + sys.argv + [channel_id,message_id])
+    
 
 @bot.command()
 @checks.is_owner()
