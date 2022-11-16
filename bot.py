@@ -45,7 +45,7 @@ class MyBot(commands.Bot):
         )
         print("-------------------")
         status_task.start()
-        if len(sys.argv) > 1: await from_restart()
+        await from_restart()
 
     async def setup_hook(self) -> None:
         for file in os.listdir(f"./cogs"):
@@ -81,15 +81,22 @@ intents.message_content = True
 bot = MyBot()
 
 async def from_restart():
-    sleep(30)
-    print('argv',sys.argv)
+    print('parsing')
     try:
-        channel_id = int(sys.argv[1])
-        message_id = int(sys.argv[2])
+        with open("temp.json", "r+",encoding='utf-8') as file:
+            data = json.load(file)
+            channel_id = int(data["channel_id"])
+            message_id = int(data["message_id"])
+            data["channel_id"] = ''
+            data["message_id"] = ''
+            file.seek(0)  # rewind
+            json.dump(data, file,indent=4)
+            file.truncate()
+        
         channel = await bot.fetch_channel(channel_id)
         msg = await channel.fetch_message(message_id)
         cont = msg.content + '\nPull and restart finished. Hello World!'
-        await msg.edit(cont)
+        await msg.edit(content=cont)
     except:
         pass
 
@@ -178,7 +185,17 @@ async def restart(ctx: Context, ext: str = None):
     sended = await ctx.send(result + '\nrestarting bot...')
     channel_id = str(ctx.channel.id)
     message_id = str(sended.id)
-    os.execv(sys.executable, ['python'] + sys.argv[0] + [channel_id,message_id])
+
+    with open("temp.json", "w",encoding='utf-8') as file:
+        # data = json.load(file)
+        data = {}
+        data["channel_id"] = channel_id
+        data["message_id"] = message_id
+        # file.seek(0)  # rewind
+        json.dump(data, file,indent=4)
+        # file.truncate()
+    
+    os.execv(sys.executable, ['python'] + sys.argv)
     
 
 @bot.command()
