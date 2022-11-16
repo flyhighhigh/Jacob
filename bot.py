@@ -58,10 +58,11 @@ class MyBot(commands.Bot):
         print(PREFIX,TOKEN)
         await bot.tree.sync()
 
-        if len(sys.argv) == 3:
-            channel_id = int(sys.argv[1])
-            message_id = int(sys.argv[2])
+        if len(sys.argv) > 1:
+            print(sys.argv)
             try:
+                channel_id = int(sys.argv[1])
+                message_id = int(sys.argv[2])
                 channel = await bot.fetch_channel(channel_id)
                 msg = await channel.fetch_message(message_id)
                 cont = msg.content + '\nPull and restart finished. Hello World!'
