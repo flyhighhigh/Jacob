@@ -4,6 +4,7 @@ import platform
 import random
 import subprocess
 import sys
+from time import sleep
 
 import discord
 from discord.ext import tasks, commands
@@ -80,7 +81,8 @@ intents.message_content = True
 bot = MyBot()
 
 async def from_restart():
-    print(sys.argv)
+    sleep(30)
+    print('argv',sys.argv)
     try:
         channel_id = int(sys.argv[1])
         message_id = int(sys.argv[2])
