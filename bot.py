@@ -81,7 +81,8 @@ intents.message_content = True
 bot = MyBot()
 
 async def from_restart():
-    print('parsing')
+    print('')
+    print('--- parsing start arguments ---')
     try:
         with open("temp.json", "r+",encoding='utf-8') as file:
             data = json.load(file)
@@ -96,9 +97,10 @@ async def from_restart():
         channel = await bot.fetch_channel(channel_id)
         msg = await channel.fetch_message(message_id)
         cont = msg.content + '\nPull and restart finished. Hello World!'
+        print('--- restart finished! ---')
         await msg.edit(content=cont)
     except:
-        pass
+        print('--- no arguments ---')
 
 # def flyhighhigh(ctx: commands.Context):
 #     if ctx.author.id == 617692516871045121:
