@@ -95,7 +95,7 @@ class Others(commands.Cog):
             [f'**{message.author.mention}** 哥 你幹嘛'],#7
             [f'**{message.author.mention}** 和我，我們倆要...好蒿爽爽！'],  # 8
             [f'**{message.author.mention}** 爽嗎兄弟<:mr_han_obscene:981863097969016832>'], # 9
-            ['我這裡剛好有個麵包 我還不餓 來 請你們吃','我跟 <@635173627108786187> 可以帶你們去costco買些好吃的喔'], #10
+            ['我這裡剛好有個麵包 我還不餓 來 請你們吃','我跟 OTING 可以帶你們去costco買些好吃的喔'], #10
             ['好啊 沒問題啊 那走啊'], #11
             ['來 呱哥送幸福 主委加碼','來 幸福好運到 主委加碼'], #12
             ['瘋 狂 送 頭！'], #13
@@ -112,8 +112,6 @@ class Others(commands.Cog):
             for keyword in keys[i]:
                 if keyword in message.content:
                     reply = random.choice(replys[i])
-                    if '<@635173627108786187>' in reply and message.Guild.id != 698431872157352003:
-                        reply = replys[0]
                     await message.reply(reply)
                     return
 
