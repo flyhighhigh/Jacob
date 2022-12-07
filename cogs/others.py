@@ -15,6 +15,7 @@ class Others(commands.Cog):
     @commands.Cog.listener('on_message')
     async def _jacob(self,message:discord.message):
         #避免讀到自己的訊息
+        print(type(message))
         if message.author == self.bot.user:
             return
         
