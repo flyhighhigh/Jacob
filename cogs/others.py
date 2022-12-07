@@ -13,9 +13,8 @@ class Others(commands.Cog):
         self.bot = bot
     
     @commands.Cog.listener('on_message')
-    async def _jacob(self,message:discord.message):
+    async def _jacob(self,message:discord.message.Message):
         #避免讀到自己的訊息
-        print(type(message))
         if message.author == self.bot.user:
             return
         
@@ -57,7 +56,8 @@ class Others(commands.Cog):
             await message.add_reaction('<:BingChiLing:966019859844567080>')
             return
         if '地震' in message.content:
-            await message.add_reaction('<:wayne2:976652232227422228>')
+            await message.reply("https://tenor.com/view/%E5%B7%A8%E6%90%A5%E7%91%9E%E6%96%AF-%E5%9C%8B%E5%8B%95-%E7%98%8B%E7%8B%97-league-of-legends-%E6%89%93%E8%83%8E%E5%8F%94%E5%8F%94-gif-13255794")
+            # await message.add_reaction('<:wayne2:976652232227422228>')
             return
 
         
