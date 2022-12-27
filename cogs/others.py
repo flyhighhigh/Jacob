@@ -161,31 +161,20 @@ class Others(commands.Cog):
     async def get_icon(self,ctx:commands.Context,id:str=''):
         """取得頭貼"""
         sended = await ctx.send('正在處理中...')
-        user = 0
 
+        if len(id)==0: id = ctx.author.id
+        else: id = int(str)
         
-
-        if len(id)==0:
-            user = ctx.author
-        else:
-            try:
-                user = await self.bot.fetch_user(int(id))
-            except:
-                return await sended.edit(content=f"找不到此使用者")
-
-        try:
+        try: #使用者在該伺服器內
+            user = await ctx.guild.fetch_member(id)
             await sended.edit(content=f"使用者頭貼: {user.avatar}\n伺服器頭貼: {user.guild_avatar}")
-        except:
-            await sended.edit(content=f"使用者頭貼: {user.avatar}\n伺服器頭貼: None")
-        
-        try:
-            async for member in ctx.guild.fetch_members():
-                if member.id == user.id:
-                    await sended.edit(content=f"使用者頭貼: {member.avatar}\n伺服器頭貼: {member.guild_avatar}")
-                    break
-        except:
-            pass
-
+        except: 
+            try: # 使用者不再該伺服器內
+                user = await self.bot.fetch_user(id)
+                await sended.edit(content=f"使用者頭貼: {user.avatar}\n伺服器頭貼: 不在此伺服器")
+            except:
+                await sended.edit(content=f"找不到此使用者")
+                
     #哪時候加入
     # @commands.hybrid_command(name='joined_加入時間',description="查看加入時間")
     # async def joined(self,ctx,members: commands.Greedy[discord.Member]):
