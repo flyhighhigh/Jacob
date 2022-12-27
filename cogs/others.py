@@ -162,17 +162,19 @@ class Others(commands.Cog):
         """取得頭貼"""
         sended = await ctx.send('正在處理中...')
 
-        if len(id)==0: id = ctx.author.id
-        else: id = int(str)
+        if len(id)==0: id = str(ctx.author.id)
         
         try: #使用者在該伺服器內
-            user = await ctx.guild.fetch_member(id)
+            print('1')
+            user = await ctx.guild.fetch_member(int(id))
             await sended.edit(content=f"使用者頭貼: {user.avatar}\n伺服器頭貼: {user.guild_avatar}")
         except: 
             try: # 使用者不再該伺服器內
-                user = await self.bot.fetch_user(id)
+                print('2')
+                user = await self.bot.fetch_user(int(id))
                 await sended.edit(content=f"使用者頭貼: {user.avatar}\n伺服器頭貼: 不在此伺服器")
             except:
+                print('3')
                 await sended.edit(content=f"找不到此使用者")
                 
     #哪時候加入
