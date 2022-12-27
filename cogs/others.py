@@ -166,8 +166,10 @@ class Others(commands.Cog):
         if len(id)==0:
             user = ctx.author
         else:
-            user = await self.bot.fetch_user(int(id))
-            print(user)
+            try:
+                user = await self.bot.fetch_user(int(id))
+            except:
+                return await sended.edit(content=f"找不到此使用者")
 
         try:
             await sended.edit(content=f"使用者頭貼: {user.avatar}\n伺服器頭貼: {user.guild_avatar}")
