@@ -163,8 +163,11 @@ class Others(commands.Cog):
         sended = await ctx.send('正在處理中...')
         user = 0
 
-        if len(id)==0: user = ctx.author
-        else: user = await self.bot.fetch_user(int(id))
+        if len(id)==0:
+            user = ctx.author
+        else:
+            user = await self.bot.fetch_user(int(id))
+            print(user)
 
         try:
             await sended.edit(content=f"使用者頭貼: {user.avatar}\n伺服器頭貼: {user.guild_avatar}")
