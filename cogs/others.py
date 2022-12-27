@@ -166,7 +166,7 @@ class Others(commands.Cog):
         if len(id)==0: user = ctx.author
         else: user = await self.bot.fetch_user(int(id))
 
-        print(user)
+        print(user.avatar,user.guild_avatar)
         await sended.edit(content=f"使用者頭貼: {user.avatar}\n伺服器頭貼: {user.guild_avatar}")
 
     #哪時候加入
