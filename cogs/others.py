@@ -172,7 +172,7 @@ class Others(commands.Cog):
                 return await sended.edit(content=f"找不到此使用者")
 
         try:
-            await sended.edit(content=f"使用者頭貼: {user.avatar}\n伺服器頭貼: {user.guild_avatar}")
+            await sended.edit(content=f"使用者頭貼: {user.avatar}\n伺服器頭貼: {user.display_avatar}")
         except:
             await sended.edit(content=f"使用者頭貼: {user.avatar}\n伺服器頭貼: None")
         
