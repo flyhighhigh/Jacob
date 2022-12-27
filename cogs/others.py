@@ -157,6 +157,16 @@ class Others(commands.Cog):
         sended = await ctx.send('正在處理中...')
         await sended.edit(content=f'Current Ping = {round(self.bot.latency*1000)}ms')
 
+    @commands.hybrid_command(name='get_icon_使用ID取得頭貼連結',description="使用使用者ID取得頭貼連結")
+    async def get_icon(self,ctx:commands.Context,id:int=0):
+        """取得頭貼"""
+        user = 0
+
+        if id==0: user = ctx.author
+        else: user = await self.bot.fetch_user(id)
+
+        await ctx.message.reply(f"使用者頭貼: {user.avatar}\n伺服器頭貼: {user.guild_avatar}")
+
     #哪時候加入
     # @commands.hybrid_command(name='joined_加入時間',description="查看加入時間")
     # async def joined(self,ctx,members: commands.Greedy[discord.Member]):
