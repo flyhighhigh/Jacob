@@ -166,8 +166,11 @@ class Others(commands.Cog):
         if len(id)==0: user = ctx.author
         else: user = await self.bot.fetch_user(int(id))
 
-        print(user.avatar,user.guild_avatar)
-        await sended.edit(content=f"使用者頭貼: {user.avatar}\n伺服器頭貼: {user.guild_avatar}")
+        try:
+            await sended.edit(content=f"使用者頭貼: {user.avatar}\n伺服器頭貼: {user.guild_avatar}")
+        except:
+            await sended.edit(content=f"使用者頭貼: {user.avatar}\n伺服器頭貼: None")
+        
 
     #哪時候加入
     # @commands.hybrid_command(name='joined_加入時間',description="查看加入時間")
