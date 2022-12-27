@@ -157,7 +157,7 @@ class Others(commands.Cog):
         sended = await ctx.send('正在處理中...')
         await sended.edit(content=f'Current Ping = {round(self.bot.latency*1000)}ms')
 
-    @commands.hybrid_command(name='geticon_使用ID取得頭貼連結',description="使用使用者ID取得頭貼連結")
+    @commands.hybrid_command(name='get_user_icon',description="使用使用者ID取得頭貼連結")
     async def get_icon(self,ctx:commands.Context,id:int=0):
         """取得頭貼"""
         user = 0
