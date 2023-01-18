@@ -29,7 +29,7 @@ class Pipp(commands.Cog):
         sended = await ctx.send('正在處理中...')
         try:
             if len(mod)!=0: install(mod)
-            a = '\n'.join([p.project_name for p in pkg_resources.working_set])
+            a = '\n'.join([f'{p.project_name} = {p.version}' for p in pkg_resources.working_set])
             await sended.edit(content=a)
         except Exception as e:
             a = '\n'.join([p.project_name for p in pkg_resources.working_set])+'\n'
