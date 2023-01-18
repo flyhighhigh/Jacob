@@ -31,7 +31,7 @@ def is_owner() -> Callable[[T], T]:
 def is_OWU(): #鬥大專屬
     async def predicate(context: commands.Context) -> bool:
         try:
-            if str(context.guild.id) == OWU: return True
+            if context.guild.id == OWU: return True
             return False
         except:
             return False
