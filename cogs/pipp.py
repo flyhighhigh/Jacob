@@ -29,9 +29,11 @@ class Pipp(commands.Cog):
         try:
             install('sxtwl')
             install('zhdate')
-            await sended.edit(content='\n'.join([p.project_name for p in pkg_resources.working_set]))
+            a = '\n'.join([p.project_name for p in pkg_resources.working_set])
+            await sended.edit(content=a)
         except Exception as e:
-            await sended.edit(content=f'{"\n".join([p.project_name for p in pkg_resources.working_set])}\nerror:{e}')
+            a = '\n'.join([p.project_name for p in pkg_resources.working_set])+'\n'
+            await sended.edit(content=f'{a}+error:{e}')
         
         
     #哪時候加入
