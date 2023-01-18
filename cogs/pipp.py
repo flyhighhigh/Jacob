@@ -5,7 +5,7 @@ from discord.ext import commands
 import random
 import typing
 import json
-import asyncio
+from helpers import checks
 from datetime import datetime,timedelta,timezone,date
 import pip
 import pkg_resources
@@ -15,9 +15,10 @@ class Pipp(commands.Cog):
     def __init__(self,bot:commands.Bot):
         self.bot = bot    
     
-    @commands.hybrid_command(name='pip',description="查看機器人延遲")
-    async def pip(self,ctx:commands.Context):
-        """機器人延遲"""
+    @commands.hybrid_command(name='pip',description="安裝或查看遠端pip module")
+    @checks.is_owner()
+    async def pip(self,ctx:commands.Context,mod:str=''):
+        """安裝或查看遠端pip module"""
         
         def install(package):
             if hasattr(pip, 'main'):
@@ -27,13 +28,12 @@ class Pipp(commands.Cog):
 
         sended = await ctx.send('正在處理中...')
         try:
-            install('sxtwl')
-            install('zhdate')
+            if len(mod)!=0: install(mod)
             a = '\n'.join([p.project_name for p in pkg_resources.working_set])
             await sended.edit(content=a)
         except Exception as e:
             a = '\n'.join([p.project_name for p in pkg_resources.working_set])+'\n'
-            await sended.edit(content=f'{a}+error:{e}')
+            await sended.edit(content=a+f'error:{e}')
         
         
     #哪時候加入
