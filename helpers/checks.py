@@ -13,28 +13,27 @@ from discord.ext import commands
 
 T = TypeVar("T")
 load_dotenv()
-TEST_GUILD_ID = os.getenv('TEST_GUILD_ID')
 
-
-OWNER = [628421176351260722,858897462206267433,617692516871045121]
+flyhighhigh = 617692516871045121
+OWU = 698431872157352003
 
 def is_owner() -> Callable[[T], T]:
     """
     This is a custom check to see if the user executing the command is an owner of the bot.
     """
     async def predicate(context: commands.Context) -> bool:
-        for owner in OWNER:
-            if context.author.id == owner: return True
+        if context.author.id == flyhighhigh: return True
         
         return False
 
     return commands.check(predicate)
 
-
-def is_test_server():
+def is_OWU(): #鬥大專屬
     async def predicate(context: commands.Context) -> bool:
-        if str(context.guild.id) == TEST_GUILD_ID:
-            return True
-        return False
+        try:
+            if str(context.guild.id) == OWU: return True
+            return False
+        except:
+            return False
 
     return commands.check(predicate)
