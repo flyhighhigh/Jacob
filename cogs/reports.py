@@ -50,6 +50,7 @@ class Report(commands.Cog, name="Report"):
         name="report_拉清單",
         description="別看今日鬧的歡，小心今後拉清單"
     )
+    @checks.is_OWU()
     async def report(self, ctx: commands.Context,idiot:str,reason:str=None):
         """
         拉清單
@@ -76,6 +77,7 @@ class Report(commands.Cog, name="Report"):
         name="delete_report_解除清單",
         description="解除被誤拉的清單"
     )
+    @checks.is_OWU()
     async def _delete_report(self, ctx: commands.Context,idiot:str):
         """
         解除清單
@@ -111,6 +113,7 @@ class Report(commands.Cog, name="Report"):
         name="show_reports_查看目前清單",
         description="別看今日鬧的歡，小心今後拉清單"
     )
+    @checks.is_OWU()
     async def _show_reports(self, ctx: commands.Context):
         """
         秀出目前清單
