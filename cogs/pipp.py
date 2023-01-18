@@ -8,6 +8,7 @@ import json
 import asyncio
 from datetime import datetime,timedelta,timezone,date
 import pip
+import pkg_resources
 
 
 class Pipp(commands.Cog):
@@ -28,9 +29,9 @@ class Pipp(commands.Cog):
         try:
             install('sxtwl')
             install('zhdate')
-            await sended.edit(content=f'Current Ping = {round(self.bot.latency*1000)}ms')
+            await sended.edit(content='\n'.join([p.project_name for p in pkg_resources.working_set]))
         except Exception as e:
-            await sended.edit(content=f'error:{e}')
+            await sended.edit(content=f'{"\n".join([p.project_name for p in pkg_resources.working_set])}\nerror:{e}')
         
         
     #哪時候加入
