@@ -88,7 +88,7 @@ class Bazi(commands.Cog, name="bazi-commands"):
             )
             await ctx.send(embed=embed,ephemeral=True)
         except Exception as e:
-            return await ctx.send(embed=discord.Embed(description='輸入數值不正確！'+e),ephemeral=True)
+            return await ctx.send(embed=discord.Embed(description=f'輸入數值不正確：{e}'),ephemeral=True)
         
         #分發身分組
         try:
