@@ -46,7 +46,7 @@ class Bazi(commands.Cog, name="bazi-commands"):
     @checks.is_owner()
     async def bazirole(self, ctx: commands.Context,yyyy:int,mm:int,dd:int,hh:typing.Optional[int]=-1) -> None:
         """
-        輸入生日計算五行，並分發身分組 
+        輸入西元生日計算五行
         """
         ### 機器人身分組要是幾乎最高才可以，在他以上的他管不到
         sended = await ctx.send(embed=discord.Embed(description='正在處理中...'),ephemeral=True)
@@ -88,11 +88,14 @@ class Bazi(commands.Cog, name="bazi-commands"):
         await ctx.send(embed=embed,ephemeral=True)
 
         #分發身分組
-        for role_id in roles.values():
-            if role_id != roles[gan5[Gan[dGZ.tg]]]:
-                await ctx.author.remove_roles(ctx.guild.get_role(role_id))
-            else:
-                await ctx.author.add_roles(ctx.guild.get_role(role_id))
+        try:
+            for role_id in roles.values():
+                if role_id != roles[gan5[Gan[dGZ.tg]]]:
+                    await ctx.author.remove_roles(ctx.guild.get_role(role_id))
+                else:
+                    await ctx.author.add_roles(ctx.guild.get_role(role_id))
+        except:
+            pass
 
 
 async def setup(bot):
