@@ -16,6 +16,7 @@ load_dotenv()
 
 flyhighhigh = 617692516871045121
 OWU = 698431872157352003
+G5 = 985817891268087818
 
 def is_owner() -> Callable[[T], T]:
     """
@@ -32,6 +33,16 @@ def is_OWU(): #鬥大專屬
     async def predicate(context: commands.Context) -> bool:
         try:
             if context.guild.id == OWU: return True
+            return False
+        except:
+            return False
+
+    return commands.check(predicate)
+
+def is_G5SH_guild(): #g5專屬
+    async def predicate(context: commands.Context) -> bool:
+        try:
+            if context.guild.id == G5: return True
             return False
         except:
             return False

@@ -19,21 +19,19 @@ class Pipp(commands.Cog):
     @checks.is_owner()
     async def pip(self,ctx:commands.Context,mod:str=''):
         """安裝或查看遠端pip module"""
-        
-        def install(package):
-            if hasattr(pip, 'main'):
-                pip.main(['install', package])
-            else:
-                pip._internal.main(['install', package])
-
+    
         sended = await ctx.send('正在處理中...')
         try:
-            if len(mod)!=0: install(mod)
+            if len(mod)!=0: # 安裝mod
+                if hasattr(pip, 'main'):
+                    pip.main(['install', mod])
+                else:
+                    pip._internal.main(['install', mod])
             a = '\n'.join([f'{p.project_name} = {p.version}' for p in pkg_resources.working_set])
-            await sended.edit(content=a)
+            await sended.edit(content='請求成功:\n'+a)
         except Exception as e:
             a = '\n'.join([p.project_name for p in pkg_resources.working_set])+'\n'
-            await sended.edit(content=a+f'error:{e}')
+            await sended.edit(content='請求失敗:\n'+a+f'error:{e}')
         
         
     #哪時候加入
