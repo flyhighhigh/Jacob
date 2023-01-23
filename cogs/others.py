@@ -17,10 +17,6 @@ class Others(commands.Cog):
         #避免讀到自己的訊息
         if message.author == self.bot.user:
             return
-        try:
-            if message.guild.id != 698431872157352003: return # 非鬥大
-        except:
-            return
         
         cont = message.content
         while True:# 去除<id>
@@ -64,6 +60,10 @@ class Others(commands.Cog):
             # await message.add_reaction('<:wayne2:976652232227422228>')
             return
 
+        try:
+            if message.guild.id != 698431872157352003: return # 非鬥大情況
+        except:
+            return
         
         keys = [
             ['聽話','你幹嘛','哥不要'],  # 0
