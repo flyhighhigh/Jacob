@@ -50,7 +50,7 @@ class Bazi(commands.Cog, name="bazi-commands"):
         輸入西元生日計算五行
         """
         ### 機器人身分組要是幾乎最高才可以，在他以上的他管不到
-        sended = await ctx.send(embed=discord.Embed(description=f'{year} {month} {day} {hour} 正在處理中...'),ephemeral=True)
+        sended = await ctx.send(embed=discord.Embed(description=f'{year}/{month}/{day}/{hour}，正在處理中...'),ephemeral=True)
         date = None
         try:
             if not hour: date = datetime(year,month,day)
@@ -83,7 +83,10 @@ class Bazi(commands.Cog, name="bazi-commands"):
                 color=colors[gan5[Gan[dGZ.tg]]]
             )
             embed.set_author('五行查詢結果',icon_url=self.bot.user.avatar)
-
+            embed.set_footer(
+                text=f"已為 {ctx.author.display_name} 分發【{gan5[Gan[dGZ.tg]]}】身分組！"
+            )
+            await ctx.send(embed=embed,ephemeral=True)
         except Exception as e:
             return await ctx.send(embed=discord.Embed(description='輸入數值不正確！'+e),ephemeral=True)
         
@@ -94,13 +97,10 @@ class Bazi(commands.Cog, name="bazi-commands"):
                     await ctx.author.remove_roles(ctx.guild.get_role(role_id))
                 else:
                     await ctx.author.add_roles(ctx.guild.get_role(role_id))
-            embed.set_footer(
-                text=f"已為 {ctx.author.display_name} 分發【{gan5[Gan[dGZ.tg]]}】身分組！"
-            )
         except:
             pass
 
-        await ctx.send(embed=embed,ephemeral=True)
+        
 
 
 async def setup(bot):
