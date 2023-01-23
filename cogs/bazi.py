@@ -50,7 +50,7 @@ class Bazi(commands.Cog, name="bazi-commands"):
         輸入西元生日計算五行
         """
         ### 機器人身分組要是幾乎最高才可以，在他以上的他管不到
-        sended = await ctx.send(embed=discord.Embed(description='正在處理中...'),ephemeral=True)
+        sended = await ctx.send(embed=discord.Embed(description=f'{year} {month} {day} {hour} 正在處理中...'),ephemeral=True)
         date = None
         try:
             if not hour: date = datetime(year,month,day)
