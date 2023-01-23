@@ -29,6 +29,13 @@ colors = {
     '火':discord.Color.red(),
     '土':discord.Color.dark_gold()
 }
+img = {
+    '金':"https://cdn.discordapp.com/attachments/1001125552947740702/1035171205310844988/10_1.png",
+    '木':"https://cdn.discordapp.com/attachments/1001125552947740702/1035174001288429688/10.png",
+    '水':"https://cdn.discordapp.com/attachments/1001125552947740702/1035170768897724556/7_1.png",
+    '火':"https://cdn.discordapp.com/attachments/1001125552947740702/1035171133248503818/8_1.png",
+    '土':"https://cdn.discordapp.com/attachments/1001125552947740702/1035174115608371271/14.png"
+}
 
 Gan = ["甲", "乙", "丙", "丁", "戊", "己", "庚", "辛", "壬", "癸"]
 Zhi = ["子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥"]
@@ -61,12 +68,9 @@ class Bazi(commands.Cog, name="bazi-commands"):
             mGZ = lunar_date.getMonthGZ()
             dGZ = lunar_date.getDayGZ()
             
-            st = "八字 【 "+ Gan[yGZ.tg]+Zhi[yGZ.dz]+" "
-            st += Gan[mGZ.tg]+Zhi[mGZ.dz]+" "
-            st += Gan[dGZ.tg]+Zhi[dGZ.dz]+' '
-
-            ast = f'農曆 {lunar_date.getLunarYear()}年' 
-            ast += f'{lunar_date.getLunarMonth()}月{lunar_date.getLunarDay()}日'
+            st = f"八字: {Gan[yGZ.tg]+Zhi[yGZ.dz]} {Gan[mGZ.tg]+Zhi[mGZ.dz]} {Gan[dGZ.tg]+Zhi[dGZ.dz]} "
+            ast = f'農曆: {lunar_date.getLunarYear()}年 ' 
+            ast += f'{lunar_date.getLunarMonth()}月 {lunar_date.getLunarDay()}日 '
 
             if not hour: st += '－－'
             else:
@@ -74,7 +78,6 @@ class Bazi(commands.Cog, name="bazi-commands"):
                 st += Gan[hGZ.tg]+Zhi[hGZ.dz]
                 ast += f'{hour}時'
             
-            st += ' 】'
             dst = f"您的日主天干為【{gan5[Gan[dGZ.tg]]}】"
 
             embed = discord.Embed(
@@ -83,12 +86,15 @@ class Bazi(commands.Cog, name="bazi-commands"):
                 color=colors[gan5[Gan[dGZ.tg]]]
             )
             embed.set_author(name='五行查詢結果',icon_url=self.bot.user.avatar)
+            embed.set_image(url=img[gan5[Gan[dGZ.tg]]])
+            embed.set_thumbnail(url=img[gan5[Gan[dGZ.tg]]])
             embed.set_footer(
-                text=f"已為 {ctx.author.display_name} 分發【{gan5[Gan[dGZ.tg]]}】身分組！"
+                text=f"已為 {ctx.author.display_name} 分發【{gan5[Gan[dGZ.tg]]}】身分組！",
+                icon_url=ctx.author.avatar
             )
             await ctx.send(embed=embed,ephemeral=True)
         except Exception as e:
-            return await ctx.send(embed=discord.Embed(description=f'輸入數值不正確：{e}'),ephemeral=True)
+            return await ctx.send(embed=discord.Embed(description=f'輸入數值不正確！'),ephemeral=True)
         
         #分發身分組
         try:
