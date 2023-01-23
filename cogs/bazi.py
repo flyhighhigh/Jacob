@@ -52,17 +52,17 @@ class Bazi(commands.Cog, name="bazi-commands"):
         name="bazi",
         description="輸入西元生日計算五行"
     )
+    @checks.is_owner()
     async def bazirole(self, ctx: commands.Context,year:int,month:int,day:int,hour:typing.Optional[int]) -> None:
         """
         輸入西元生日計算五行
         """
         ### 機器人身分組要是幾乎最高才可以，在他以上的他管不到
-        sended = await ctx.send(embed=discord.Embed(description=f'{year}/{month}/{day}/{hour}，正在處理中...'),ephemeral=True)
+        sended = await ctx.send(embed=discord.Embed(description=f'{year}年{month}月{day}日{hour}時，正在處理中...'),ephemeral=True)
         date = None
         try:
             if not hour: date = datetime(year,month,day)
             else: date = datetime(year,month,day,hour)
-            await ctx.send(embed=discord.Embed(description=f'{date}'),ephemeral=True)
             lunar_date = sxtwl.fromSolar(date.year,date.month,date.day) # 換算農曆
             yGZ = lunar_date.getYearGZ()
             mGZ = lunar_date.getMonthGZ()
@@ -96,14 +96,16 @@ class Bazi(commands.Cog, name="bazi-commands"):
             return await ctx.send(embed=discord.Embed(description=f'輸入數值不正確！{e}'),ephemeral=True)
         
         #分發身分組
-        try:
-            for role_id in roles.values():
+        
+        for role_id in roles.values():
+            try:
                 if role_id != roles[gan5[Gan[dGZ.tg]]]:
                     await ctx.author.remove_roles(ctx.guild.get_role(role_id))
                 else:
                     await ctx.author.add_roles(ctx.guild.get_role(role_id))
-        except:
-            pass
+            except:
+                pass
+        
 
         
 
