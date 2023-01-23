@@ -52,7 +52,7 @@ class Bazi(commands.Cog, name="bazi-commands"):
         sended = await ctx.send(embed=discord.Embed(description='正在處理中...'),ephemeral=True)
 
         if yyyy < 1900 or 1 > mm or mm > 12 or 1 > dd or dd > 31:
-            return await sended.edit(embed=discord.Embed(description='輸入數值不正確！'),ephemeral=True)
+            return await ctx.send(embed=discord.Embed(description='輸入數值不正確！'),ephemeral=True)
             
         try:
             day = sxtwl.fromSolar(yyyy, mm, dd)
@@ -85,9 +85,9 @@ class Bazi(commands.Cog, name="bazi-commands"):
             embed.set_footer(
                 text=f"已為 {ctx.author} 分發【{gan5[Gan[dGZ.tg]]}】身分組！"
             )
-            await sended.edit(embed=embed,ephemeral=True)
+            await ctx.send(embed=embed,ephemeral=True)
         except Exception as e:
-            await sended.edit(embed=discord.Embed(description=f'出現問題:{e}'),ephemeral=True)
+            await ctx.send(embed=discord.Embed(description=f'出現問題:{e}'),ephemeral=True)
 
         #分發身分組
         try:
