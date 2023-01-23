@@ -55,7 +55,7 @@ class Bazi(commands.Cog, name="bazi-commands"):
         try:
             if not hour: date = datetime(year,month,day)
             else: date = datetime(year,month,day,hour)
-            
+            await ctx.send(embed=discord.Embed(description=f'{date}'),ephemeral=True)
             lunar_date = sxtwl.fromSolar(date.year,date.month,date.day) # 換算農曆
             yGZ = lunar_date.getYearGZ()
             mGZ = lunar_date.getMonthGZ()
