@@ -11,6 +11,8 @@ import discord
 from discord import Interaction
 from discord.ext import commands
 from helpers import checks
+from zhdate import ZhDate
+from datetime import datetime
 import sxtwl
 
 roles = {
@@ -44,51 +46,49 @@ class Bazi(commands.Cog, name="bazi-commands"):
         description="輸入西元生日計算五行"
     )
     @checks.is_owner()
-    async def bazirole(self, ctx: commands.Context,yyyy:int,mm:int,dd:int,hh:typing.Optional[int]=-1) -> None:
+    async def bazirole(self, ctx: commands.Context,year:int,month:int,day:int,hour:typing.Optional[int]) -> None:
         """
         輸入西元生日計算五行
         """
         ### 機器人身分組要是幾乎最高才可以，在他以上的他管不到
         sended = await ctx.send(embed=discord.Embed(description='正在處理中...'),ephemeral=True)
-
-        if yyyy < 1900 or 1 > mm or mm > 12 or 1 > dd or dd > 31:
-            return await ctx.send(embed=discord.Embed(description='輸入數值不正確！'),ephemeral=True)
-            
+        date = None
         try:
-            day = sxtwl.fromSolar(yyyy, mm, dd)
-            yGZ = day.getYearGZ()
-            mGZ = day.getMonthGZ()
-            dGZ = day.getDayGZ()
-
+            if not hour: date = datetime(year,month,day)
+            else: date = datetime(year,month,day,hour)
+            
+            lunar_date = sxtwl.fromSolar(date.year,date.month,date.day) # 換算農曆
+            yGZ = lunar_date.getYearGZ()
+            mGZ = lunar_date.getMonthGZ()
+            dGZ = lunar_date.getDayGZ()
+            
             st = "八字 【 "+ Gan[yGZ.tg]+Zhi[yGZ.dz]+" "
             st += Gan[mGZ.tg]+Zhi[mGZ.dz]+" "
             st += Gan[dGZ.tg]+Zhi[dGZ.dz]+' '
-            if hh != -1:
-                hGZ = day.getHourGZ(hh)
-                st += Gan[hGZ.tg]+Zhi[hGZ.dz]
+
+            ast = f'農曆 {lunar_date.getLunarYear()}年' 
+            ast += f'{lunar_date.getLunarMonth()}月{lunar_date.getLunarDay()}日'
+
+            if not hour: st += '－－'
             else:
-                st += '- -'
+                hGZ = day.getHourGZ(hour)
+                st += Gan[hGZ.tg]+Zhi[hGZ.dz]
+                ast += f'{hour}時'
+            
             st += ' 】'
-
-            ast = f'農曆 {day.getLunarYear()}年{day.getLunarMonth()}月{day.getLunarDay()}日'
-            if hh != -1:
-                ast += f'{hh}時'
-
-            dst = "對照的五行為"+gan5[Gan[dGZ.tg]]+"\n"
+            dst = f"您的日主天干為【{gan5[Gan[dGZ.tg]]}】"
 
             embed = discord.Embed(
-                title=st,
-                description=dst,
+                title=dst,
+                description=st+'\n'+ast,
                 color=colors[gan5[Gan[dGZ.tg]]]
             )
-            embed.set_author(name=ast)
-            embed.set_footer(
-                text=f"已為 {ctx.author} 分發【{gan5[Gan[dGZ.tg]]}】身分組！"
-            )
-            await ctx.send(embed=embed,ephemeral=True)
-        except Exception as e:
-            await ctx.send(embed=discord.Embed(description=f'出現問題:{e}'),ephemeral=True)
+            embed.set_author('五行查詢結果',icon_url=self.bot.user.avatar)
 
+        except Exception as e:
+            await sended.delete()
+            return await ctx.send(embed=discord.Embed(description='輸入數值不正確！'+e),ephemeral=True)
+        
         #分發身分組
         try:
             for role_id in roles.values():
@@ -96,8 +96,13 @@ class Bazi(commands.Cog, name="bazi-commands"):
                     await ctx.author.remove_roles(ctx.guild.get_role(role_id))
                 else:
                     await ctx.author.add_roles(ctx.guild.get_role(role_id))
+            embed.set_footer(
+                text=f"已為 {ctx.author.display_name} 分發【{gan5[Gan[dGZ.tg]]}】身分組！"
+            )
         except:
             pass
+        
+        await ctx.send(embed=embed,ephemeral=True)
 
 
 async def setup(bot):
