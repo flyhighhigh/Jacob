@@ -45,7 +45,6 @@ class Bazi(commands.Cog, name="bazi-commands"):
         name="bazi",
         description="輸入西元生日計算五行"
     )
-    @checks.is_owner()
     async def bazirole(self, ctx: commands.Context,year:int,month:int,day:int,hour:typing.Optional[int]) -> None:
         """
         輸入西元生日計算五行
@@ -86,7 +85,6 @@ class Bazi(commands.Cog, name="bazi-commands"):
             embed.set_author('五行查詢結果',icon_url=self.bot.user.avatar)
 
         except Exception as e:
-            await sended.delete()
             return await ctx.send(embed=discord.Embed(description='輸入數值不正確！'+e),ephemeral=True)
         
         #分發身分組
@@ -101,7 +99,7 @@ class Bazi(commands.Cog, name="bazi-commands"):
             )
         except:
             pass
-        
+
         await ctx.send(embed=embed,ephemeral=True)
 
 
