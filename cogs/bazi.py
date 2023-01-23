@@ -74,7 +74,7 @@ class Bazi(commands.Cog, name="bazi-commands"):
 
             if not hour: st += '－－'
             else:
-                hGZ = day.getHourGZ(hour)
+                hGZ = lunar_date.getHourGZ(hour)
                 st += Gan[hGZ.tg]+Zhi[hGZ.dz]
                 ast += f'{hour}時'
             
