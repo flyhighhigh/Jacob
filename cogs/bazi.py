@@ -85,7 +85,7 @@ class Bazi(commands.Cog, name="bazi-commands"):
         embed.set_footer(
             text=f"已為 {ctx.author} 分發【{gan5[Gan[dGZ.tg]]}】身分組！"
         )
-        await ctx.send(embed=embed,ephemeral=True)
+        await sended.edit(embed=embed,ephemeral=True)
 
         #分發身分組
         try:
