@@ -82,7 +82,7 @@ class Bazi(commands.Cog, name="bazi-commands"):
                 description=st+'\n'+ast,
                 color=colors[gan5[Gan[dGZ.tg]]]
             )
-            embed.set_author('五行查詢結果',icon_url=self.bot.user.avatar)
+            embed.set_author(name='五行查詢結果',icon_url=self.bot.user.avatar)
             embed.set_footer(
                 text=f"已為 {ctx.author.display_name} 分發【{gan5[Gan[dGZ.tg]]}】身分組！"
             )
