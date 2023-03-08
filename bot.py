@@ -12,6 +12,7 @@ from discord.ext.commands import Bot
 from discord.ext.commands import Context
 from dotenv import load_dotenv
 import git
+import datetime
 
 from helpers import checks
 
@@ -120,6 +121,25 @@ async def status_task() -> None:
     act = discord.Activity(name=random.choice(statuses),
                            type=discord.ActivityType.playing)
     await bot.change_presence(activity=act)
+
+@tasks.loop(seconds=60.0)
+async def birthday_task() -> None:
+    """
+    Setup the OWU birthday task of the bot
+    """
+    try:
+        channel = await bot.fetch_channel(698431872673251330) # 鬥陣大學 聊天系
+        date = datetime.datetime.utcnow() + datetime.timedelta(hours=8)
+        # if date.month == 4 and date.day == 11 and date.hour == 0 and date.minute <= 10:
+        if date.month == 3 and date.day == 9 and date.hour == 3 and 25 <= date.minute < 26:
+            year = date.year - 2020
+            embed = discord.Embed(title='',
+                                  description=f'**恭喜 鬥陣大學 邁入{year}週年！！**',
+                                  color=0xf93a2f)
+            await channel.send(embed=embed)
+    except:
+        pass
+
 
 @bot.command()
 @checks.is_owner()
