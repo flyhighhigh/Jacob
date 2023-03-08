@@ -132,11 +132,10 @@ async def birthday_task() -> None:
         channel = await bot.fetch_channel(698431872673251330) # 鬥陣大學 聊天系
         date = datetime.datetime.utcnow() + datetime.timedelta(hours=8)
         print(date)
-        # if date.month == 4 and date.day == 11 and date.hour == 0 and date.minute <= 10:
-        if date.month == 3 and date.day == 9 and date.hour == 3 and 52 <= date.minute < 53:
+        if date.month == 4 and date.day == 11 and date.hour == 0 and 0 <= date.minute < 1:
             year = date.year - 2020
             embed = discord.Embed(title='',
-                                  description=f'**恭喜 鬥陣大學 邁入{year}週年！！**',
+                                  description=f'**🎉🎉 恭喜 鬥陣大學 邁入{year}週年 🎉🎉**',
                                   color=0xf93a2f)
             await channel.send(embed=embed)
     except Exception as e:
