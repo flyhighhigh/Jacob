@@ -130,6 +130,7 @@ async def birthday_task() -> None:
     try:
         channel = await bot.fetch_channel(698431872673251330) # 鬥陣大學 聊天系
         date = datetime.datetime.utcnow() + datetime.timedelta(hours=8)
+        print(date)
         # if date.month == 4 and date.day == 11 and date.hour == 0 and date.minute <= 10:
         if date.month == 3 and date.day == 9 and date.hour == 3 and 44 <= date.minute < 45:
             year = date.year - 2020
