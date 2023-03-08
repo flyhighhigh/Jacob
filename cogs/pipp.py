@@ -33,6 +33,10 @@ class Pipp(commands.Cog):
             a = '\n'.join([p.project_name for p in pkg_resources.working_set])+'\n'
             await sended.edit(content='請求失敗:\n'+a+f'error:{e}')
         
+        with open("log.txt", "r",encoding='utf-8') as file:
+            ret = file.read()
+            await ctx.send(ret)
+        
         
     #哪時候加入
     # @commands.hybrid_command(name='joined_加入時間',description="查看加入時間")

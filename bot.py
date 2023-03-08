@@ -138,7 +138,8 @@ async def birthday_task() -> None:
                                   color=0xf93a2f)
             await channel.send(embed=embed)
     except Exception as e:
-        print(e)
+        with open("log.txt", "r+",encoding='utf-8') as file:
+            file.write(str(e))
 
 
 @bot.command()
